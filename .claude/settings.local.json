@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import config, db, books, users, borrowings, cli; print\\('All modules imported successfully'\\)\")",
+      "Bash(Test-Path *)"
+    ]
+  }
+}

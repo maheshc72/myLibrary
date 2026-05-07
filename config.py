@@ -1,0 +1,3 @@
+DB_NAME = "library.db"
+BORROW_LIMIT_DAYS = 5
+FINE_PER_DAY = 1
