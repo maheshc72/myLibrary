@@ -22,6 +22,23 @@ def seed_users() -> None:
             )
 
 
+def add_user(username: str, email: str) -> int:
+    """Insert a new user and return their user_id."""
+    with sqlite3.connect("library.db") as con:
+        con.execute("PRAGMA foreign_keys = ON")
+        cursor = con.execute(
+            "INSERT INTO Users (username, email) VALUES (?, ?)",
+            (username, email),
+        )
+        return cursor.lastrowid
+
+
+def get_all_users() -> list[tuple]:
+    """Return all registered users."""
+    with sqlite3.connect("library.db") as con:
+        return con.execute("SELECT user_id, username, email FROM Users").fetchall()
+
+
 def add_book(title: str, author: str, user_id: int, publication_year: int | None = None) -> int:
     """Insert a book and return its generated book_id."""
     with sqlite3.connect("library.db") as con:
@@ -82,14 +99,49 @@ def menu(user_id: int) -> None:
             print("Invalid choice, please enter 0, 1, or 2.")
 
 
+def main_menu() -> None:
+    """Top-level menu to manage or select users."""
+    while True:
+        print("\n=== Library System ===")
+        print("1. Select User (Login)")
+        print("2. Create New User")
+        print("0. Exit")
+        choice = input("Choice: ").strip()
+
+        if choice == "1":
+            users = get_all_users()
+            if not users:
+                print("No users found. Please create one first.")
+                continue
+            
+            print(f"\n{'ID':<5} {'Username':<20} {'Email'}")
+            print("-" * 45)
+            for uid, name, email in users:
+                print(f"{uid:<5} {name:<20} {email}")
+            
+            try:
+                user_id = int(input("\nEnter User ID to manage books: ").strip())
+                # Basic validation check
+                if any(u[0] == user_id for u in users):
+                    menu(user_id)
+                else:
+                    print("Invalid User ID.")
+            except ValueError:
+                print("Please enter a valid numeric ID.")
+
+        elif choice == "2":
+            username = input("Enter username: ").strip()
+            email = input("Enter email: ").strip()
+            try:
+                new_id = add_user(username, email)
+                print(f"User created successfully with ID: {new_id}")
+            except sqlite3.IntegrityError:
+                print("Error: Username or Email already exists.")
+
+        elif choice == "0":
+            break
+
 if __name__ == "__main__":
     init_db()
     seed_users()
-
-    try:
-        user_id = int(input("Enter your user ID: ").strip())
-    except ValueError:
-        print("User ID must be a number.")
-        raise SystemExit(1)
-
-    menu(user_id)
+    main_menu()
