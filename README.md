@@ -7,30 +7,69 @@ A command-line library management system built with Python and SQLite.
 - **Python 3.10+**
 - **SQLite 3** (usually pre-installed with Python)
 
-## Features
+## Getting Started
+
+1. **Clone the repository:**
+   ```bash
+   git clone <your-repository-url>
+   cd myLibrary_v1
+   ```
+2. **Run the application:**
+   ```bash
+   python cli.py
+   ```
+
+## Implemented Features
 
 ### Book Management
-- **Add books** — Add new books to the catalog with title, author, and optional publication year
-- **View all books** — List every book in the catalog with ID, title, author, and year
-- **Update books** — Edit any field of an existing book (title, author, publication year)
-- **Delete books** — Remove a book from the catalog; deletion is blocked if the book is currently borrowed
+- **Add a book** — Add a new book (title, author, optional publication year); existing catalog is shown before prompting
+- **Update a book** — Edit title, author, or publication year; leave a field blank to keep the current value
+- **Delete a book** — Remove a book; blocked if the book is currently borrowed by anyone
+- **Browse available books** — Users see only books not currently checked out
 
 ### User Management
-- **Create users** — Register new users with a unique username and email
-- **View all users** — List all registered users with their IDs and emails
-- **Delete users** — Remove a user; deletion is blocked if they have any active borrowings
-- **User login** — Select a user by ID to access their personal borrowing menu
+- **Create a user** — Register with a unique username and email
+- **Login as a user** — Select a user by ID from the full user list to enter the borrowing menu
+- **Delete a user** — Remove a user; blocked if they have active borrowings; requires confirmation
 
 ### Borrowing System
-- **Browse available books** — Users see only books that are not currently borrowed by anyone
-- **Borrow a book** — Check out a book; the borrow date is recorded automatically
-- **View borrowed books** — Users can see all books they currently have checked out, with borrow dates
-- **Return a book** — Mark a book as returned and record the return date
+- **Borrow a book** — Check out an available book; borrow date is recorded automatically
+- **View borrowed books** — See all books currently checked out, with borrow dates
+- **Return a book** — Mark a book as returned; return date is recorded and any fine is calculated
 
 ### Fine Calculation
 - Books returned within the **5-day free period** incur no charge
 - Returns after 5 days are charged **Rs. 1 per day** for each day over the limit
-- The fine amount is displayed at the time of return
+- Fine amount is displayed at the time of return
+
+### Database & Infrastructure
+- SQLite with foreign key enforcement
+- Automatic schema migration from the v1 schema (where `Books` held a `user_id` directly) to the current normalized schema
+- Configurable constants via `config.py`
+
+## Pending Features
+
+### Book Management
+- [ ] Standalone "View all books" menu option (currently the catalog is only shown as part of Add / Update / Delete flows)
+- [ ] Search / filter books by title, author, or publication year
+- [ ] Add ISBN and genre fields to books
+- [ ] Support multiple copies of the same title
+
+### User Management
+- [ ] Standalone "View all users" menu option (currently the user list is only shown inside Login and Delete flows)
+- [ ] Update user — edit username or email for an existing user
+
+### Borrowing & Fines
+- [ ] Borrowing history — view past (returned) borrowings, not just active ones
+- [ ] Admin view of all currently active borrowings across all users
+- [ ] Overdue report — list books whose borrow date has exceeded the free period
+- [ ] Fine tracking — persist fine amounts to the database rather than only displaying them at return time
+- [ ] Maximum concurrent borrow limit per user
+
+### General
+- [ ] Role-based access — separate admin and member menus
+- [ ] Book reservation / hold queue for books that are currently borrowed
+- [ ] Pagination for large catalogs or user lists
 
 ## Tech Stack
 
@@ -56,19 +95,7 @@ A command-line library management system built with Python and SQLite.
 - **Books** — `book_id`, `title`, `author`, `publication_year`
 - **Borrowings** — `borrowing_id`, `book_id`, `user_id`, `borrow_date`, `return_date`
 
-Foreign key constraints are enforced; deleting a user or book cascades to related borrowing records.
-
-## Getting Started
-
-1. **Clone the repository:**
-   ```bash
-   git clone <your-repository-url>
-   cd myLibrary_v1
-   ```
-2. **Run the application:**
-```bash
-python cli.py
-```
+Foreign key constraints are enforced. Deleting a user or book cascades to related borrowing records.
 
 ## Configuration
 
