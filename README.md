@@ -114,3 +114,7 @@ PAGE_SIZE = 10              # Rows per page in list views
 - [x] Role-based access — separate admin and member menus with admin password protection
 - [x] Book reservation / hold queue for books that are currently borrowed
 - [x] Pagination for large catalogs or user lists
+
+
+#### myLibrary web
+This will be a web based implementation of the same CLI application.
