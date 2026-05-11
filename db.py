@@ -36,3 +36,37 @@ def init_db() -> None:
             con.execute("PRAGMA foreign_keys = ON")
         else:
             con.executescript(schema)
+
+    # Run column/table migrations separately so executescript's implicit commit
+    # doesn't interfere with the ALTER TABLE DDL statements.
+    with get_connection() as con:
+        _migrate_columns(con)
+
+
+def _migrate_columns(con: sqlite3.Connection) -> None:
+    book_cols = {col[1] for col in con.execute("PRAGMA table_info(Books)").fetchall()}
+    borrow_cols = {col[1] for col in con.execute("PRAGMA table_info(Borrowings)").fetchall()}
+
+    if "isbn" not in book_cols:
+        con.execute("ALTER TABLE Books ADD COLUMN isbn TEXT")
+        con.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx_books_isbn ON Books(isbn) WHERE isbn IS NOT NULL"
+        )
+    if "genre" not in book_cols:
+        con.execute("ALTER TABLE Books ADD COLUMN genre TEXT")
+    if "copies" not in book_cols:
+        con.execute("ALTER TABLE Books ADD COLUMN copies INTEGER NOT NULL DEFAULT 1")
+    if "fine" not in borrow_cols:
+        con.execute("ALTER TABLE Borrowings ADD COLUMN fine REAL")
+
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS Reservations (
+            reservation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            book_id        INTEGER NOT NULL,
+            user_id        INTEGER NOT NULL,
+            reserved_at    DATE    NOT NULL DEFAULT CURRENT_DATE,
+            FOREIGN KEY (book_id) REFERENCES Books(book_id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+            UNIQUE (book_id, user_id)
+        )
+    """)

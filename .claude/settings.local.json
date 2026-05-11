@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(python -c \"import config, db, books, users, borrowings, cli; print\\('All modules imported successfully'\\)\")",
-      "Bash(Test-Path *)"
+      "Bash(Test-Path *)",
+      "Bash(python -c \"from db import init_db; init_db\\(\\); print\\('Migration OK'\\)\")",
+      "Bash(python -c ' *)"
     ]
   }
 }

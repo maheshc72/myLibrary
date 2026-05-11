@@ -16,6 +16,16 @@ def get_all_users() -> list[tuple]:
     with closing(get_connection()) as con:
         return con.execute("SELECT user_id, username, email FROM Users").fetchall()
 
+def update_user(user_id: int, username: str, email: str) -> None:
+    """Update username or email for an existing user."""
+    with get_connection() as con:
+        cursor = con.execute(
+            "UPDATE Users SET username = ?, email = ? WHERE user_id = ?",
+            (username, email, user_id),
+        )
+        if cursor.rowcount == 0:
+            raise ValueError(f"No user found with ID {user_id}.")
+
 
 def delete_user(user_id: int) -> None:
     with get_connection() as con:
